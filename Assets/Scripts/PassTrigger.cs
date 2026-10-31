@@ -2,19 +2,47 @@ using UnityEngine;
 
 public class PassTrigger : MonoBehaviour
 {
+    [Header("Aircraft")]
+    public PlaneController aircraft;
+
+    [Header("Obstacle Dimensions")]
+    public float obstacleDepth = 2f;
+
+    [Header("Aircraft Dimensions")]
+    public float aircraftLength = 3f;
+
     private bool passed = false;
 
-    private void OnTriggerEnter(Collider other)
+    public void Initialize(PlaneController controller)
     {
-        if (passed) return;
+        aircraft = controller;
+        passed = false;
+    }
 
-        PlaneController aircraft =
-            other.GetComponentInParent<PlaneController>();
+    void Update()
+    {
+        if (passed || aircraft == null)
+            return;
 
-        if (aircraft != null)
+        if (aircraft.isCrashed)
+            return;
+
+        // Aircraft rear position
+        float aircraftRearZ =
+            aircraft.transform.position.z - aircraftLength / 2f;
+
+        // Obstacle far edge
+        float obstacleEndZ =
+            transform.position.z + obstacleDepth / 2f;
+
+        // Entire aircraft has cleared the obstacle
+        if (aircraftRearZ > obstacleEndZ)
         {
             passed = true;
+
             aircraft.PassObstacle();
+
+            Debug.Log("Obstacle fully passed!");
         }
     }
 }
